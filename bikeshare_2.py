@@ -20,9 +20,6 @@ DAY_OF_WEEK_OPTIONS = {
     'thursday', 'friday', 'saturday', 'sunday',
 }
 
-DATA_COLUMNS = ['Start Time', 'End Time', 'Trip Duration',
-                'Start Station', 'End Station', 'User Type', 'Gender', 'Birth Year']
-
 PARSE_DATE_COLUMNS = ['Start Time', 'End Time']
 
 
@@ -95,16 +92,6 @@ def load_data(city, month, day):
     # Load data according to the entered city
     df = pd.read_csv(CITY_DATA[city], index_col=0,
                      parse_dates=PARSE_DATE_COLUMNS)
-
-    for col in DATA_COLUMNS:
-        print(f'Col: {col}')
-        print(f'Exist: {col in df.columns}')
-        # Check if the non-existent column exists
-        if col not in df.columns:
-            # Add column and fill NaN
-            df[col] = np.NaN
-
-    print(df)
 
     # Filter by month
     if month != 'all':
@@ -193,27 +180,24 @@ def user_stats(df: pd.DataFrame):
     print(f'Counts of User types: {user_type_count}')
 
     # Display counts of gender
-    gender_count = df['Gender'].value_counts().count()
-    print(f'Counts of Gender: {gender_count}')
+    if 'Gender' in df:
+        gender_count = df['Gender'].value_counts().count()
+        print(f'Counts of Gender: {gender_count}')
+    else:
+        print('Gender stats cannot be calculated because Gender does not appear in the dataframe')
 
     # Display earliest, most recent, and most common year of birth
-    if np.all(np.isnan(df['Birth Year'])):
-        earliest_birth_year = 'None'
-    else:
+    if 'Birth Year' in df:
         earliest_birth_year = np.nanmin(df['Birth Year'].values)
-    print(f'Earliest Year of Birth: {earliest_birth_year}')
+        print(f'Earliest Year of Birth: {earliest_birth_year}')
 
-    if np.all(np.isnan(df['Birth Year'])):
-        most_recent_birth_year = 'None'
-    else:
         most_recent_birth_year = np.nanmax(df['Birth Year'].values)
-    print(f'Most Recent Year of Birth: {most_recent_birth_year}')
+        print(f'Most Recent Year of Birth: {most_recent_birth_year}')
 
-    if np.all(np.isnan(df['Birth Year'])):
-        most_common_birth_year = 'None'
-    else:
         most_common_birth_year = df['Birth Year'].mode()[0]
-    print(f'Most Common Year of Birth: {most_common_birth_year}')
+        print(f'Most Common Year of Birth: {most_common_birth_year}')
+    else:
+        print('Birth Year stats cannot be calculated because Birth Year does not appear in the dataframe')
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
