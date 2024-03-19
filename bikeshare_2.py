@@ -20,6 +20,9 @@ DAY_OF_WEEK_OPTIONS = {
     'thursday', 'friday', 'saturday', 'sunday',
 }
 
+DATA_COLUMNS = ['Start Time', 'End Time', 'Trip Duration',
+                'Start Station', 'End Station', 'User Type', 'Gender', 'Birth Year']
+
 PARSE_DATE_COLUMNS = ['Start Time', 'End Time']
 
 
@@ -90,7 +93,18 @@ def load_data(city, month, day):
     """
 
     # Load data according to the entered city
-    df = pd.read_csv(CITY_DATA[city], parse_dates=PARSE_DATE_COLUMNS)
+    df = pd.read_csv(CITY_DATA[city], index_col=0,
+                     parse_dates=PARSE_DATE_COLUMNS)
+
+    for col in DATA_COLUMNS:
+        print(f'Col: {col}')
+        print(f'Exist: {col in df.columns}')
+        # Check if the non-existent column exists
+        if col not in df.columns:
+            # Add column and fill NaN
+            df[col] = np.NaN
+
+    print(df)
 
     # Filter by month
     if month != 'all':
@@ -183,13 +197,22 @@ def user_stats(df: pd.DataFrame):
     print(f'Counts of Gender: {gender_count}')
 
     # Display earliest, most recent, and most common year of birth
-    earliest_birth_year = int(df['Birth Year'].min())
+    if np.all(np.isnan(df['Birth Year'])):
+        earliest_birth_year = 'None'
+    else:
+        earliest_birth_year = np.nanmin(df['Birth Year'].values)
     print(f'Earliest Year of Birth: {earliest_birth_year}')
 
-    most_recent_birth_year = int(df['Birth Year'].max())
+    if np.all(np.isnan(df['Birth Year'])):
+        most_recent_birth_year = 'None'
+    else:
+        most_recent_birth_year = np.nanmax(df['Birth Year'].values)
     print(f'Most Recent Year of Birth: {most_recent_birth_year}')
 
-    most_common_birth_year = int(df['Birth Year'].mode()[0])
+    if np.all(np.isnan(df['Birth Year'])):
+        most_common_birth_year = 'None'
+    else:
+        most_common_birth_year = df['Birth Year'].mode()[0]
     print(f'Most Common Year of Birth: {most_common_birth_year}')
 
     print("\nThis took %s seconds." % (time.time() - start_time))
